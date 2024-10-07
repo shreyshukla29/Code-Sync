@@ -2,7 +2,7 @@
 
 const HeroSection = () => {
   return (
-    <section className="min-h-screen flex flex-col justify-center bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white py-16 px-6 md:px-12">
+    <section className="min-h-screen flex flex-col justify-center text-white py-16 px-6 md:px-12">
       <div className="max-w-screen-lg mx-auto text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
           Welcome to CodeSync
