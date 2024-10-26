@@ -3,11 +3,11 @@ import FeaturesSection from "./../component/FeatureSection";
 import LiveDemoSection from "./../component/LiveDemoSection";
 import FooterSection from "./../component/FooterSection";
 import PricingSection from "./../component/PricingSection";
-import Navbar from "./../component/Navbar";
+import Layout from './../layout/Layout';
 const HomePage = () => {
   return (
-    <>
-      <Navbar />
+    <Layout>
+     
       <div id="hero">
         <HeroSection />
       </div>
@@ -21,7 +21,7 @@ const HomePage = () => {
         <PricingSection />
       </div>
       <FooterSection />
-    </>
+    </Layout>
   );
 };
 export default HomePage;
