@@ -2,6 +2,7 @@
 
 import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from "bcrypt";
 
 const { Schema } = mongoose;
 
@@ -42,7 +43,6 @@ const userSchema = new Schema({
 userSchema.pre("save", async function () {
   console.log("executing pre save hook");
   console.log(this);
-
   const hashedPassword = await bcrypt.hash(this.password, 10);
   this.password = hashedPassword;
   console.log(this);

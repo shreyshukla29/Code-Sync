@@ -1,94 +1,138 @@
-import SidebarButton from "./sidebar-views/SidebarButton";
-import { useAppContext } from "../../context/AppContext";
-import { useSocket } from "../../context/SocketContext";
-import { useViews } from "../../context/ViewContext";
-import useResponsive from "../../hooks/useResponsive";
-import useWindowDimensions from "../../hooks/useWindowDimensions";
-import { ACTIVITY_STATE } from "../../types/app";
-import { SocketEvent } from "../../types/socket";
-import { VIEWS } from "../../types/view";
-import { IoCodeSlash } from "react-icons/io5";
-import { MdOutlineDraw } from "react-icons/md";
-import cn from "classnames";
+// src/components/Sidebar.js
+import  { useState, useEffect } from 'react';
 
 function Sidebar() {
-    const {
-        activeView,
-        isSidebarOpen,
-        viewComponents,
-        viewIcons,
-        setIsSidebarOpen,
-    } = useViews()
-    const { minHeightReached } = useResponsive()
-    const { activityState, setActivityState } = useAppContext()
-    const { socket } = useSocket()
-    const { isMobile } = useWindowDimensions()
+    const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+    const [renderSectionWidth, setRenderSectionWidth] = useState(200); // Default render section width
+    const [activeSection, setActiveSection] = useState("files");
 
-    const changeState = () => {
-        if (activityState === ACTIVITY_STATE.CODING) {
-            setActivityState(ACTIVITY_STATE.DRAWING)
-            socket.emit(SocketEvent.REQUEST_DRAWING)
-        } else {
-            setActivityState(ACTIVITY_STATE.CODING)
-        }
+    const iconWidth = 60; // Fixed width for the icons section
 
-        if (isMobile) {
-            setIsSidebarOpen(false)
+    const icons = [
+        { emoji: "📂", label: "Files", section: "files" },
+        { emoji: "👤", label: "Users", section: "Users" },
+        { emoji: "▶️", label: "Run", section: "run" },
+        { emoji: "💬", label: "Chat", section: "chat" },
+        { emoji: "⚙️", label: "Settings", section: "settings" },
+       
+    ];
+
+    // Automatically close sidebar on small screens
+    useEffect(() => {
+        const handleResize = () => {
+            setIsSidebarOpen(window.innerWidth >= 768);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    // Toggle sidebar visibility for mobile screens
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    // Handle render section resizing
+    const handleMouseDown = (e) => {
+        const startX = e.clientX;
+        const startWidth = renderSectionWidth;
+
+        const handleMouseMove = (e) => {
+            const newWidth = startWidth + (e.clientX - startX);
+            if (newWidth >= 100 && newWidth <= 500) { // Min and max width for render section
+                setRenderSectionWidth(newWidth);
+            }
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+        };
+
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+    };
+
+    // Render content based on active section
+    const renderContent = () => {
+        switch (activeSection) {
+            case "files":
+                return <div className="text-white">Files Section</div>;
+            case "run":
+                return <div className="text-white">Run Section</div>;
+            case "chat":
+                return <div className="text-white">Chat Section</div>;
+            case "settings":
+                return <div className="text-white">Settings Section</div>;
+            case "Users":
+                return <div className="text-white">Users</div>;
+            default:
+                return <div className="text-white">Files Section</div>;
         }
-    }
+    };
 
     return (
-        <aside className="flex w-full md:h-full md:max-h-full md:min-h-full md:w-auto
-         ">
-            <div
-                className={cn(
-                    "fixed bottom-0 left-0 z-50 flex h-[50px] w-full gap-6 self-end overflow-auto border-t border-darkHover bg-dark p-3 md:static md:h-full md:w-[50px] md:min-w-[50px] md:flex-col md:border-r md:border-t-0 md:p-2 md:pt-4 text-white",
-                    {
-                        hidden: minHeightReached,
-                    },
-                )}
-            >
-                <SidebarButton
-                    viewName={VIEWS.FILES}
-                    icon={viewIcons[VIEWS.FILES]}
-                />
-                <SidebarButton
-                    viewName={VIEWS.CHATS}
-                    icon={viewIcons[VIEWS.CHATS]}
-                />
-                <SidebarButton
-                    viewName={VIEWS.RUN}
-                    icon={viewIcons[VIEWS.RUN]}
-                />
-                <SidebarButton
-                    viewName={VIEWS.CLIENTS}
-                    icon={viewIcons[VIEWS.CLIENTS]}
-                />
-                <SidebarButton
-                    viewName={VIEWS.SETTINGS}
-                    icon={viewIcons[VIEWS.SETTINGS]}
-                />
+        <div className="flex h-full">
+            {/* Sidebar Icons Section */}
 
-                {/* Button to change activity state coding or drawing */}
-                <button className="self-end" onClick={changeState}>
-                    {activityState === ACTIVITY_STATE.CODING ? (
-                        <MdOutlineDraw size={30} />
-                    ) : (
-                        <IoCodeSlash size={30} />
-                    )}
-                </button>
-            </div>
             <div
-                className="absolute left-0 top-0 z-20 w-full flex-grow flex-col bg-dark md:static md:w-[300px]"
-                style={isSidebarOpen ? {} : { display: "none" }}
+                style={{
+                    width: isSidebarOpen ? iconWidth : iconWidth,
+                    transition: "width 0.3s",
+                   
+                }}
+                className="bg-gray-800 h-full flex flex-col items-center py-4 relative"
             >
-                {/* Render the active view component */}
-                {viewComponents[activeView]}
+                {/* Toggle button for mobile screens */}
+                <button
+                    onClick={toggleSidebar}
+                    className="absolute top-4 left-full bg-gray-700 text-white p-1 rounded-md md:hidden"
+                >
+                    {isSidebarOpen ? "←" : "→"}
+                </button>
+
+                {/* Sidebar Icons */}
+                {isSidebarOpen && (
+                    <>
+                        {icons.map((icon) => (
+                            <button
+                                key={icon.section}
+                                onClick={() => setActiveSection(icon.section)}
+                                className="text-white text-2xl mb-4"
+                                aria-label={icon.label}
+                            >
+                                {icon.emoji}
+                            </button>
+                        ))}
+                    </>
+                )}
             </div>
-        </aside>
-    )
+
+            {/* Render Section (Content) */}
+            {isSidebarOpen && (
+                
+                <div
+                    style={{ width: renderSectionWidth, 
+                        transition: "width 0.3s",
+                        overflow: isSidebarOpen ? "visible" : "hidden",
+                    } 
+                }
+               
+                    className="relative  flex-shrink-0 p-6 bg-gray-900 text-white"
+                >
+                    {renderContent()}
+                    {/* Resizer Handle */}
+
+                    <div
+                            onMouseDown={handleMouseDown}
+                            className="absolute 
+                            right-0  top-0 h-full w-1 cursor-col-resize bg-gray-600"
+                        ></div>
+                    
+                </div>
+
+            )}
+        </div>
+    );
 }
 
-
-
-export default Sidebar
+export default Sidebar;

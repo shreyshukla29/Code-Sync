@@ -1,10 +1,16 @@
 // controllers/user.controller.js
-import { loginService, logoutService, createRoomService, joinRoomService } from '../services/user.service.js';
+import { loginService, logoutService, createRoomService, joinRoomService,
+  signInUserService
+ } from '../services/user.service.js';
 
 export const loginUser = async (req, res) => {
   try {
     const response = await loginService(req.body);
-    res.status(200).json(response);
+    res.status(200).json({
+      message : " login success",
+      success : true,
+      data : response
+    });
 
   } catch (error) {
     res.status(500).json({ error: 'Login failed', details: error.message });
@@ -42,3 +48,18 @@ export const joinRoom = async (req, res) => {
     res.status(500).json({ error: 'Join room failed', details: error.message });
   }
 };
+
+export const signInUser = async(req,res)=>{
+
+  try {
+
+    const response = await signInUserService(req.body);
+    res.status(200).json({
+      message:"user sign up successfully",
+      success : true
+    })
+    
+  } catch (error) {
+    
+  }
+}

@@ -1,10 +1,10 @@
-export const ACTIONS = {
-    JOIN: 'join',
-    JOINED: 'joined',
-    DISCONNECTED: 'disconnected',
-    CODE_CHANGE: 'code-change',
-    SYNC_CODE: 'sync-code',
-    LEAVE: 'leave',
+// socket.js
+
+// Define the SocketId type as a string
+const SocketId = String;
+
+// Define the SocketEvent object to mimic an enum
+const SocketEvent = {
     JOIN_REQUEST: "join-request",
     JOIN_ACCEPTED: "join-accepted",
     USER_JOINED: "user-joined",
@@ -29,3 +29,11 @@ export const ACTIONS = {
     SYNC_DRAWING: "sync-drawing",
     DRAWING_UPDATE: "drawing-update",
 };
+
+// Define the SocketContext constructor function
+function SocketContext(socket) {
+    this.socket = socket; // Initialize the socket property
+}
+
+// Export the SocketEvent object, SocketContext constructor, and SocketId
+export { SocketEvent, SocketContext, SocketId };
