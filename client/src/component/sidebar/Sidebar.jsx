@@ -1,13 +1,13 @@
+/* eslint-disable react/prop-types */
 // src/components/Sidebar.js
 import  { useState, useEffect } from 'react';
+import FileExplorer from './sidebar-views/FilesView';
 
-function Sidebar() {
+function Sidebar({openFile , closeFile}) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
     const [renderSectionWidth, setRenderSectionWidth] = useState(200); // Default render section width
     const [activeSection, setActiveSection] = useState("files");
-
     const iconWidth = 60; // Fixed width for the icons section
-
     const icons = [
         { emoji: "📂", label: "Files", section: "files" },
         { emoji: "👤", label: "Users", section: "Users" },
@@ -56,7 +56,7 @@ function Sidebar() {
     const renderContent = () => {
         switch (activeSection) {
             case "files":
-                return <div className="text-white">Files Section</div>;
+                return <FileExplorer openFile={openFile}  closeFile={closeFile}/>;
             case "run":
                 return <div className="text-white">Run Section</div>;
             case "chat":
@@ -80,7 +80,7 @@ function Sidebar() {
                     transition: "width 0.3s",
                    
                 }}
-                className="bg-gray-800 h-full flex flex-col items-center py-4 relative"
+                className="bg-gray-800 h-full flex flex-col items-center py-4 relative border-r-2 border-gray-600"
             >
                 {/* Toggle button for mobile screens */}
                 <button
@@ -117,7 +117,7 @@ function Sidebar() {
                     } 
                 }
                
-                    className="relative  flex-shrink-0 p-6 bg-gray-900 text-white"
+                    className="relative  flex-shrink-0  bg-gray-900 text-white"
                 >
                     {renderContent()}
                     {/* Resizer Handle */}

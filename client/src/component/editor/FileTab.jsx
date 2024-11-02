@@ -1,104 +1,137 @@
-import { useFileSystem } from "../../context/FileContext";
-import { getIconClassName } from "../../utils/getIconClassName";
-import { IoClose } from "react-icons/io5";
-import cn from "classnames";
-import { useEffect, useRef } from "react";
-import customMapping from "../../utils/customMapping";
-import { useSettings } from "../../context/SettingContext";
-import langMap from "lang-map";
-import { Icon } from "@iconify/react";
+/* eslint-disable react/prop-types */
+// import { useFileSystem } from "../../context/FileContext";
+// import { getIconClassName } from "../../utils/getIconClassName";
+// import { IoClose } from "react-icons/io5";
+// import cn from "classnames";
+// import { useEffect, useRef } from "react";
+// import customMapping from "../../utils/customMapping";
+// import { useSettings } from "../../context/SettingContext";
+// import langMap from "lang-map";
+// import { Icon } from "@iconify/react";
 
-function FileTab() {
-  const { openFiles, closeFile, activeFile, updateFileContent, setActiveFile } =
-    useFileSystem();
-  const fileTabRef = useRef(null);
-  const { setLanguage } = useSettings();
 
-  const changeActiveFile = (fileId) => {
-    // If the file is already active, do nothing
-    if (activeFile?.id === fileId) return;
 
-    updateFileContent(activeFile?.id || "", activeFile?.content || "");
+// function FileTab() {
+//   const { openFiles, closeFile, activeFile, updateFileContent, setActiveFile } =
+//     useFileSystem();
+//   const fileTabRef = useRef(null);
+//   const { setLanguage } = useSettings();
 
-    const file = openFiles.find((file) => file.id === fileId);
-    if (file) {
-      setActiveFile(file);
-    }
-  };
+//   const changeActiveFile = (fileId) => {
+//     // If the file is already active, do nothing
+//     if (activeFile?.id === fileId) return;
 
-  useEffect(() => {
-    const fileTabNode = fileTabRef.current;
-    if (!fileTabNode) return;
+//     updateFileContent(activeFile?.id || "", activeFile?.content || "");
 
-    const handleWheel = (e) => {
-      if (e.deltaY > 0) {
-        fileTabNode.scrollLeft += 100;
-      } else {
-        fileTabNode.scrollLeft -= 100;
-      }
-    };
+//     const file = openFiles.find((file) => file.id === fileId);
+//     if (file) {
+//       setActiveFile(file);
+//     }
+//   };
 
-    fileTabNode.addEventListener("wheel", handleWheel);
+//   useEffect(() => {
+//     const fileTabNode = fileTabRef.current;
+//     if (!fileTabNode) return;
 
-    return () => {
-      fileTabNode.removeEventListener("wheel", handleWheel);
-    };
-  }, []);
+//     const handleWheel = (e) => {
+//       if (e.deltaY > 0) {
+//         fileTabNode.scrollLeft += 100;
+//       } else {
+//         fileTabNode.scrollLeft -= 100;
+//       }
+//     };
 
-  // Update the editor language when a file is opened
-  useEffect(() => {
-    if (activeFile?.name === undefined) return;
-    // Get file extension on file open and set language when file is opened
-    const extension = activeFile.name.split(".").pop();
-    if (!extension) return;
+//     fileTabNode.addEventListener("wheel", handleWheel);
 
-    // Check if custom mapping exists
-    if (customMapping[extension]) {
-      setLanguage(customMapping[extension]);
-      return;
-    }
+//     return () => {
+//       fileTabNode.removeEventListener("wheel", handleWheel);
+//     };
+//   }, []);
 
-    const language = langMap.languages(extension);
-    setLanguage(language[0]);
-  }, [activeFile?.name, setLanguage]);
+//   // Update the editor language when a file is opened
+//   useEffect(() => {
+//     if (activeFile?.name === undefined) return;
+//     // Get file extension on file open and set language when file is opened
+//     const extension = activeFile.name.split(".").pop();
+//     if (!extension) return;
 
+//     // Check if custom mapping exists
+//     if (customMapping[extension]) {
+//       setLanguage(customMapping[extension]);
+//       return;
+//     }
+
+//     const language = langMap.languages(extension);
+//     setLanguage(language[0]);
+//   }, [activeFile?.name, setLanguage]);
+
+//   return (
+//     <div
+//       className="flex h-[50px] w-full select-none gap-2 p-2 pb-0"
+//       ref={fileTabRef}
+//     >
+//       {openFiles.map((file) => (
+//         <span
+//           key={file.id}
+//           className={cn(
+//             "flex w-fit cursor-pointer items-center rounded-t-md px-2 py-1 text-white",
+//             { "bg-darkHover": file.id === activeFile?.id }
+//           )}
+//           onClick={() => changeActiveFile(file.id)}
+//         >
+//           <Icon
+//             icon={getIconClassName(file.name)}
+//             fontSize={22}
+//             className="mr-2 min-w-fit"
+//           />
+//           <p
+//             className="flex-grow cursor-pointer overflow-hidden truncate"
+//             title={file.name}
+//           >
+//             {file.name}
+//           </p>
+//           <IoClose
+//             className="ml-3 inline rounded-md hover:bg-darkHover"
+//             size={20}
+//             onClick={(e) => {
+//               e.stopPropagation(); // Prevent click from triggering the file change
+//               closeFile(file.id);
+//             }}
+//           />
+//         </span>
+//       ))}
+//     </div>
+//   );
+// }
+
+// export default FileTab;
+
+
+import { FaTimes } from 'react-icons/fa';
+const FileTabs = ({ openFiles, activeFile, setActiveFile, closeFile }) => {
+  console.log(openFiles)
   return (
-    <div
-      className="flex h-[50px] w-full select-none gap-2 p-2 pb-0"
-      ref={fileTabRef}
-    >
-      {openFiles.map((file) => (
-        <span
-          key={file.id}
-          className={cn(
-            "flex w-fit cursor-pointer items-center rounded-t-md px-2 py-1 text-white",
-            { "bg-darkHover": file.id === activeFile?.id }
-          )}
-          onClick={() => changeActiveFile(file.id)}
+    <div className="flex bg-gray-900 text-white border-b border-gray-700 mt-0 py-4">
+      {openFiles?.map((file) => (
+        <div
+          key={file}
+          className={`flex items-center p-2 pr-4 cursor-pointer ${
+            activeFile === file ? 'bg-gray-800' : 'bg-gray-900'
+          }`}
+          onClick={() => setActiveFile(file)}
         >
-          <Icon
-            icon={getIconClassName(file.name)}
-            fontSize={22}
-            className="mr-2 min-w-fit"
-          />
-          <p
-            className="flex-grow cursor-pointer overflow-hidden truncate"
-            title={file.name}
-          >
-            {file.name}
-          </p>
-          <IoClose
-            className="ml-3 inline rounded-md hover:bg-darkHover"
-            size={20}
+          <span className="text-sm mr-2 text-white">{file.name}</span>
+          <FaTimes
+            className="text-xs cursor-pointer hover:text-red-500"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent click from triggering the file change
-              closeFile(file.id);
+              e.stopPropagation();
+              closeFile(file);
             }}
           />
-        </span>
+        </div>
       ))}
     </div>
   );
-}
+};
 
-export default FileTab;
+export default FileTabs;

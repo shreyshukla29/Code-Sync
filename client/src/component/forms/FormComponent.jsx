@@ -64,7 +64,6 @@ const FormComponent = () => {
         e.preventDefault()
       //  if (status === USER_STATUS.ATTEMPTING_JOIN) return
        // if (!validateForm()) return
-        toast.loading("Joining room...")
 //setStatus(USER_STATUS.ATTEMPTING_JOIN)
        // socket.emit(SocketEvent.JOIN_REQUEST, currentUser)
 
@@ -78,6 +77,7 @@ const FormComponent = () => {
         return;
        }
        navigate(`/Editor/${roomId}`)
+       toast.success("room joined..")
     }
 
     // useEffect(() => {

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import CodeMirror from '@uiw/react-codemirror';
@@ -15,9 +16,11 @@ import {
 
 
 import Sidebar from './sidebar/Sidebar';
+import FileTab from './editor/FileTab';
 
 
-function Editor() {
+function Editor({openFiles , closeFile , activeFile,setActiveFile}) {
+
   const [value, setValue] = React.useState("console.log('hello world!');");
   const [language, setLanguage] = React.useState('javascript');
   const [theme, setTheme] = React.useState('vscodeDark');
@@ -69,9 +72,10 @@ function Editor() {
   return (
     <div className="flex h-screen w-full">
     
-      <div className="flex-grow p-4">
+      <div className=" flex flex-col flex-grow p-4">
+        <FileTab openFiles={openFiles} closeFile={closeFile} activeFile={activeFile} setActiveFile={setActiveFile} />
         <CodeMirror
-          value={value}
+          value={activeFile?.content || ""}
           theme={getTheme()}
           height="calc(100vh - 32px)" // Adjust height for any header
           extensions={[
