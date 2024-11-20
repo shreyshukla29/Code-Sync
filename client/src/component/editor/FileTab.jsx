@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+
 // import { useFileSystem } from "../../context/FileContext";
 // import { getIconClassName } from "../../utils/getIconClassName";
 // import { IoClose } from "react-icons/io5";
@@ -108,24 +108,41 @@
 
 
 import { FaTimes } from 'react-icons/fa';
-const FileTabs = ({ openFiles, activeFile, setActiveFile, closeFile }) => {
-  console.log(openFiles)
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import {closeFile,openFile} from "../../Redux/Slices/File.slice"
+const FileTabs = () => {
+
+  const dispatch = useDispatch();
+ 
+    const FileClose = (fileName) => {
+      dispatch(closeFile({fileId: fileName?.id}))
+    };
+
+    const handleFileCLick = (file)=>{
+      dispatch(openFile({file}))
+    }
+
+  const {openFiles,activeFile} = useSelector((state)=> state.file)
+  console.log(activeFile)
   return (
-    <div className="flex bg-gray-900 text-white border-b border-gray-700 mt-0 py-4">
+    <div className="flex bg-zinc-900 text-white border-b border-gray-700 mt-0 py-4 pb-0
+    overflow-x-auto no-scrollbar pl-1 h-12">
       {openFiles?.map((file) => (
         <div
-          key={file}
+          key={file?.id}
           className={`flex items-center p-2 pr-4 cursor-pointer ${
-            activeFile === file ? 'bg-gray-800' : 'bg-gray-900'
-          }`}
-          onClick={() => setActiveFile(file)}
+            activeFile.id === file.id ? ' bg-gray-600 rounded-t' :''
+          }`
+       }
+       onClick={() => handleFileCLick(file)}
         >
           <span className="text-sm mr-2 text-white">{file.name}</span>
           <FaTimes
             className="text-xs cursor-pointer hover:text-red-500"
             onClick={(e) => {
               e.stopPropagation();
-              closeFile(file);
+              FileClose(file);
             }}
           />
         </div>

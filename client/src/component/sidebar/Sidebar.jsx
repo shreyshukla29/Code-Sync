@@ -2,8 +2,9 @@
 // src/components/Sidebar.js
 import  { useState, useEffect } from 'react';
 import FileExplorer from './sidebar-views/FilesView';
+import SettingsView from './sidebar-views/SettingsView';
 
-function Sidebar({openFile , closeFile}) {
+function Sidebar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
     const [renderSectionWidth, setRenderSectionWidth] = useState(200); // Default render section width
     const [activeSection, setActiveSection] = useState("files");
@@ -56,13 +57,13 @@ function Sidebar({openFile , closeFile}) {
     const renderContent = () => {
         switch (activeSection) {
             case "files":
-                return <FileExplorer openFile={openFile}  closeFile={closeFile}/>;
+                return <FileExplorer />;
             case "run":
                 return <div className="text-white">Run Section</div>;
             case "chat":
                 return <div className="text-white">Chat Section</div>;
             case "settings":
-                return <div className="text-white">Settings Section</div>;
+                return <SettingsView/>;
             case "Users":
                 return <div className="text-white">Users</div>;
             default:
@@ -71,27 +72,25 @@ function Sidebar({openFile , closeFile}) {
     };
 
     return (
-        <div className="flex h-full">
+        <div className="flex h-full ">
             {/* Sidebar Icons Section */}
 
             <div
                 style={{
                     width: isSidebarOpen ? iconWidth : iconWidth,
-                    transition: "width 0.3s",
-                   
+                    transition: "width 0.3s",        
                 }}
-                className="bg-gray-800 h-full flex flex-col items-center py-4 relative border-r-2 border-gray-600"
+                className="bg-zinc-900  h-full flex flex-col items-center py-4 relative border-r-2 border-gray-600"
             >
                 {/* Toggle button for mobile screens */}
                 <button
                     onClick={toggleSidebar}
-                    className="absolute top-4 left-full bg-gray-700 text-white p-1 rounded-md md:hidden"
+                    className="absolute top-4 left-full bg-gray-700 text-white p-1 rounded-md md:hidden right-0"
                 >
                     {isSidebarOpen ? "←" : "→"}
                 </button>
 
                 {/* Sidebar Icons */}
-                {isSidebarOpen && (
                     <>
                         {icons.map((icon) => (
                             <button
@@ -104,12 +103,10 @@ function Sidebar({openFile , closeFile}) {
                             </button>
                         ))}
                     </>
-                )}
             </div>
 
             {/* Render Section (Content) */}
-            {isSidebarOpen && (
-                
+            {isSidebarOpen && (    
                 <div
                     style={{ width: renderSectionWidth, 
                         transition: "width 0.3s",
@@ -117,11 +114,10 @@ function Sidebar({openFile , closeFile}) {
                     } 
                 }
                
-                    className="relative  flex-shrink-0  bg-gray-900 text-white"
+                    className="relative  flex-shrink-0  bg-zinc-800 text-white min-w-44 h-screen w-full"
                 >
                     {renderContent()}
                     {/* Resizer Handle */}
-
                     <div
                             onMouseDown={handleMouseDown}
                             className="absolute 

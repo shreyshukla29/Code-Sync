@@ -98,57 +98,33 @@
 
 // export default FilesView
 
-
-
 // FileExplorer.js
 import  { useState } from 'react';
 import { FaFolder, FaFolderOpen, FaFile, FaPlusSquare, FaFolderPlus } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import {addFileOrFolder,openFile} from "../../../Redux/Slices/File.slice"
+const FileExplorer = () => {
+ 
+  const {fileStructure} = useSelector((state)=>state.file)
+  const dispatch = useDispatch();
 
-const FileExplorer = ({openFile}) => {
-  const [fileStructure, setFileStructure] = useState([
-    { name: 'src', type: 'folder', children: [
-        { name: 'App.js', type: 'file' },
-        { name: 'index.js', type: 'file' },
-      ] 
-    },
-    { name: 'public', type: 'folder', children: [
-        { name: 'index.html', type: 'file',content:"" },
-      ] 
-    },
-    { name: 'README.md', type: 'file',content :"hello" },
-  ]);
-
-  //const {fileStrucutre} = useSelector((state)=>state.file)
-
-
+  const fileOpen = (fileName) => {
+       dispatch(openFile({file:fileName}))
+    };
 
   const addFile = (parentFolder) => {
     const newFileName = prompt('Enter file name');
     if (!newFileName) return;
-
-    const updatedStructure = addToFolder(fileStructure, parentFolder, { name: newFileName, type: 'file' });
-    setFileStructure(updatedStructure);
+    console.log(parentFolder)
+   dispatch(addFileOrFolder({parentId: parentFolder.id , name:newFileName,type:'file'}))
   };
 
   const addFolder = (parentFolder) => {
     const newFolderName = prompt('Enter folder name');
     if (!newFolderName) return;
-
-    const updatedStructure = addToFolder(fileStructure, parentFolder, { name: newFolderName, type: 'folder', children: [] });
-    setFileStructure(updatedStructure);
-  };
-
-
-  const addToFolder = (structure, folder, newItem) => {
-    return structure.map((item) => {
-      if (item === folder) {
-        return { ...item, children: [...item.children, newItem] };
-      } else if (item.type === 'folder') {
-        return { ...item, children: addToFolder(item.children, folder, newItem) };
-      }
-      return item;
-    });
+    dispatch(addFileOrFolder({parentId:parentFolder.id , name:newFolderName , type :"folder"}))
+   // setFileStructure(updatedStructure);
   };
 
 
@@ -162,11 +138,11 @@ const FileExplorer = ({openFile}) => {
             level={level}
             onAddFile={() => addFile(item)}
             onAddFolder={() => addFolder(item)}
-            openFile = {openFile}
+            fileOpen = {fileOpen}
           />
         );
       } else if (item.type === 'file') {
-        return <FileNode key={item.name} item={item} level={level} onOpenFile={() => openFile(item)} />;
+        return <FileNode key={item.name} item={item} level={level} onOpenFile={() => fileOpen(item)} />;
       }
       return null;
     });
@@ -174,27 +150,29 @@ const FileExplorer = ({openFile}) => {
 
   return (
     <div className="flex w-full">
-      <div className="w-full p-2 bg-gray-800 text-gray-300 h-screen">
-        <h2 className="text-lg font-bold mb-4">File Explorer</h2>
-        {renderTree(fileStructure)}
+      <div className="w-full p-2 text-gray-300 h-screen">
+        <h2 className="text-lg font-bold mb-4 border-b border-white p-1 ">Files </h2>
+       <div     
+       className= "overflow-x-hidden overflow-y-scroll no-scrollbar">
+       {renderTree(fileStructure)}
+       </div>
       </div>
     </div>
   );
 };
 
-const FolderNode = ({ item, level, onAddFile, onAddFolder,openFile }) => {
+const FolderNode = ({ item, level, onAddFile, onAddFolder,fileOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleOpen = () => setIsOpen(!isOpen);
-
   return (
     <div>
       <div
-        className={`flex items-center ml-${level * 4} space-x-2 cursor-pointer text-blue-400`}
+        className={`flex items-center ml-${level * 4} space-x-2 cursor-pointer text-yellow-400`}
         onClick={toggleOpen}
       >
         {isOpen ? <FaFolderOpen /> : <FaFolder />}
-        <span className="font-semibold">{item.name}</span>
+        <span className="font-semibold text-white">{item.name}</span>
         <button onClick={(e) => { e.stopPropagation(); onAddFile(); }} className="text-gray-400 hover:text-gray-200 ml-2">
           <FaPlusSquare className="text-xs" title="Add File" />
         </button>
@@ -206,7 +184,7 @@ const FolderNode = ({ item, level, onAddFile, onAddFolder,openFile }) => {
         return child.type === 'folder' ? (
           <FolderNode key={child.name} item={child} level={level + 1} onAddFile={onAddFile} onAddFolder={onAddFolder} />
         ) : (
-          <FileNode key={child.name} item={child} level={level + 1} onOpenFile={() => openFile(child)} />
+          <FileNode key={child.name} item={child} level={level + 1} onOpenFile={() => fileOpen(child)} />
         );
       })}</div>}
     </div>
