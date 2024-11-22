@@ -36,8 +36,6 @@ export const createAccount = createAsyncThunk(
   }
 );
 
-
-
 export const login = createAsyncThunk(
   "/auth/login",
   async (data, { rejectWithValue }) => {
@@ -89,8 +87,6 @@ export const logout = createAsyncThunk(
   }
 );
 
-
-
 const AuthSlice = createSlice({
   name: "auth",
   initialState,
@@ -115,7 +111,6 @@ const AuthSlice = createSlice({
       state.isLoggedIn = false;
       state.data = {};
     });
-
   },
 });
 

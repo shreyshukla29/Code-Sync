@@ -7,10 +7,6 @@ import FriendAndInvitations from "../component/FriendAndInvitations";
 import ActiveRooms from "../component/ActiveRooms";
 import Layout from "./../layout/Layout";
 
-import { useAppContext } from "../context/AppContext"
-import { useSocket } from "../context/SocketContext"
-import { SocketEvent } from "../types/socket"
-import { USER_STATUS } from "../types/user"
 import { ChangeEvent, FormEvent, useEffect, useRef } from "react"
 import { toast } from "react-hot-toast"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -20,7 +16,6 @@ import FormComponent from './../component/forms/FormComponent';
 
 const Dashboard = () => {
   const [activeRooms, setActiveRooms] = useState([]);
- 
   return (
     <Layout>
       <div className="bg-gradient-to-r from-gray-800 via-gray-900 to-black min-h-screen flex mt-24 md:mt-40">

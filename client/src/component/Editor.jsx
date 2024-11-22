@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 
 /* eslint-disable no-unused-vars */
 import React from 'react';
@@ -11,36 +12,99 @@ import {
   dracula, 
   githubDark, 
   materialDark,
-  nord 
+  nord ,abcdef
 } from "@uiw/codemirror-themes-all";
 
 
+import { abyss } from "@uiw/codemirror-themes-all";
+import { androidstudio } from "@uiw/codemirror-themes-all";
+import { andromeda } from "@uiw/codemirror-themes-all";
+import { atomone } from "@uiw/codemirror-themes-all";
+import { aura } from "@uiw/codemirror-themes-all";
+import { basicDark } from "@uiw/codemirror-themes-all";
+import { basicLight } from "@uiw/codemirror-themes-all";
+import { bbedit } from "@uiw/codemirror-themes-all";
+import { bespin } from "@uiw/codemirror-themes-all";
+import { copilot } from "@uiw/codemirror-themes-all";
+import { darcula } from "@uiw/codemirror-themes-all";
+import { duotoneDark } from "@uiw/codemirror-themes-all";
+import { duotoneLight } from "@uiw/codemirror-themes-all";
+import { eclipse } from "@uiw/codemirror-themes-all";
+import { githubLight } from "@uiw/codemirror-themes-all";
+import { gruvboxDark } from "@uiw/codemirror-themes-all";
+import { gruvboxLight } from "@uiw/codemirror-themes-all";
+import { kimbie } from "@uiw/codemirror-themes-all";
+import { material } from "@uiw/codemirror-themes-all";
+import { materialLight } from "@uiw/codemirror-themes-all";
+import { monokai } from "@uiw/codemirror-themes-all";
+import { monokaiDimmed } from "@uiw/codemirror-themes-all";
+import { noctisLilac } from "@uiw/codemirror-themes-all";
+import { okaidia } from "@uiw/codemirror-themes-all";
+import { quietlight } from "@uiw/codemirror-themes-all";
+import { red } from "@uiw/codemirror-themes-all";
+import { solarizedDark } from "@uiw/codemirror-themes-all";
+import { solarizedLight } from "@uiw/codemirror-themes-all";
+import { sublime } from "@uiw/codemirror-themes-all";
+import { tokyoNight } from "@uiw/codemirror-themes-all";
+import { tokyoNightDay } from "@uiw/codemirror-themes-all";
+import { tokyoNightStorm } from "@uiw/codemirror-themes-all";
+import { tomorrowNightBlue } from "@uiw/codemirror-themes-all";
+
+import { whiteDark } from "@uiw/codemirror-themes-all";
+import { whiteLight } from "@uiw/codemirror-themes-all";
+import { xcodeDark } from "@uiw/codemirror-themes-all";
+import { xcodeLight } from "@uiw/codemirror-themes-all";
 import Sidebar from './sidebar/Sidebar';
 import FileTab from './editor/FileTab';
 import { useSelector } from 'react-redux';
+import {updateFileContent} from "../Redux/Slices/File.slice"
+import { useDispatch } from 'react-redux';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { editorThemes } from './../resources/Themes';
+import { toast } from 'react-hot-toast';
 
-
-function Editor() {
+function Editor({theme, language,fontSize , fontFamily}) {
 
   const {openFiles,activeFile} = useSelector((state)=>state.file)
+  console.log(theme)
 
-  const [value, setValue] = React.useState("console.log('hello world!');");
-  const [language, setLanguage] = React.useState('javascript');
-  const [theme, setTheme] = React.useState('vscodeDark');
+  const [content, setcontent] = useState(activeFile?.content || "");
 
-  const onChange = React.useCallback((val) => {
-    console.log('val:', val);
-    setValue(val);
-  }, []);
-  const handleLanguageChange = (e) => {
-    setLanguage(e.target.value);
-    setValue("");
+const dispatch = useDispatch();
+const handleSave = async () => {
+  const id = activeFile?.id;
+  if (id) {
+    const resp = await dispatch(updateFileContent({ id, content }));
+    toast.dismiss()
+    toast.success("Code saved")
+  }else {
+    toast.error("Error in saving code")
+  }
+};
+
+// Listen for Ctrl+S or Cmd+S
+const handleKeyDown = (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault();
+    handleSave();
+  }
+
+  if (e.key === "Enter") {
+    e.preventDefault(); // Prevent default "Enter" behavior
+    setcontent((prevValue) => prevValue + "\n");
+  }
+};
+
+// Attach keydown listener on mount
+useEffect(() => {
+  window.addEventListener("keydown", handleKeyDown);
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
   };
-
-  const handleThemeChange = (e) => {
-    setTheme(e.target.value);
-  };
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [content, activeFile,useSelector]);
+  
   const getLanguage = () => {
     switch (language) {
       case 'javascript':
@@ -49,6 +113,30 @@ function Editor() {
         return python();
       case 'html':
         return html();
+      // case 'css':
+      //   return css();
+      // case 'java':
+      //   return java();
+      // case 'c':
+      //   return c();
+      // case 'csharp':
+      //   return csharp();
+      // case 'php':
+      //   return php();
+      // case 'ruby':
+      //   return ruby();
+      // case 'go':
+      //   return go();
+      // case 'typescript':
+      //   return typescript();
+      // case 'rust':
+      //   return rust();
+      // case 'swift':
+      //   return swift();
+      // case 'kotlin':
+      //   return kotlin();
+      // case 'dart':
+      //   return dart();
       default:
         return javascript({ jsx: true });
     }
@@ -56,19 +144,10 @@ function Editor() {
 
   // Theme mapping
   const getTheme = () => {
-    switch (theme) {
-      case 'dracula':
-        return dracula;
-      case 'githubDark':
-        return githubDark;
-      case 'materialDark':
-        return materialDark;
-      case 'nord':
-        return nord;
-      case 'vscodeDark':
-      default:
-        return vscodeDark;
-    }
+    // Ensure the theme exists in the editorThemes object, fallback to 'VS Code Dark' if not found
+    console.log(editorThemes[theme])
+    console.log("theme ",editorThemes['VS Code Dark'])
+    return editorThemes[theme] || editorThemes['VS Code Dark'];
   };
 
   return (
@@ -87,7 +166,7 @@ function Editor() {
                     ]}
                     minHeight="100%"
                     maxWidth="100vw"
-                    onChange={onChange}
+                    onChange={(val) => setcontent(val)}
                 />
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-gray-500">

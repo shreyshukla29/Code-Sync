@@ -1,12 +1,14 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
 // src/components/Sidebar.js
 import  { useState, useEffect } from 'react';
 import FileExplorer from './sidebar-views/FilesView';
 import SettingsView from './sidebar-views/SettingsView';
+import RunView from './sidebar-views/RunView';
 
-function Sidebar() {
+function Sidebar({theme,language,fontSize, fontFamily,setTheme,setLanguage,setFontFamily,setFontSize}) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
-    const [renderSectionWidth, setRenderSectionWidth] = useState(200); // Default render section width
+    const [renderSectionWidth, setRenderSectionWidth] = useState(400); // Default render section width
     const [activeSection, setActiveSection] = useState("files");
     const iconWidth = 60; // Fixed width for the icons section
     const icons = [
@@ -39,7 +41,7 @@ function Sidebar() {
 
         const handleMouseMove = (e) => {
             const newWidth = startWidth + (e.clientX - startX);
-            if (newWidth >= 100 && newWidth <= 500) { // Min and max width for render section
+            if (newWidth >= 200 && newWidth <= 500) { // Min and max width for render section
                 setRenderSectionWidth(newWidth);
             }
         };
@@ -59,11 +61,12 @@ function Sidebar() {
             case "files":
                 return <FileExplorer />;
             case "run":
-                return <div className="text-white">Run Section</div>;
+                return <RunView language={language}/>;
             case "chat":
                 return <div className="text-white">Chat Section</div>;
             case "settings":
-                return <SettingsView/>;
+                return <SettingsView theme={theme} language={language} 
+                fontSize={fontSize} fontFamily={fontFamily} setTheme={setTheme} setLanguage={setLanguage} setFontFamily={setFontFamily} setFontSize={setFontSize}/>;
             case "Users":
                 return <div className="text-white">Users</div>;
             default:

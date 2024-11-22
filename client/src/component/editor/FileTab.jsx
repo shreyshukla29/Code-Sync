@@ -124,7 +124,6 @@ const FileTabs = () => {
     }
 
   const {openFiles,activeFile} = useSelector((state)=> state.file)
-  console.log(activeFile)
   return (
     <div className="flex bg-zinc-900 text-white border-b border-gray-700 mt-0 py-4 pb-0
     overflow-x-auto no-scrollbar pl-1 h-12">
