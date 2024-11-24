@@ -4,6 +4,8 @@ import storage from "redux-persist/lib/storage"; // defaults to localStorage for
 
 import AuthSliceReducer from "./Slices/Auth.slice";
 import fileSliceReducer from "./Slices/File.slice";
+import RoomSliceReducer from "./Slices/Room.slice";
+import SocketSliceReducer from "./Slices/Socket.Slice"
 
 // Configure persistence only for the `file` slice
 const filePersistConfig = {
@@ -14,6 +16,8 @@ const filePersistConfig = {
 // Apply persistReducer only to the `file` slice
 const rootReducer = combineReducers({
   auth: AuthSliceReducer, // Non-persisted
+  room:RoomSliceReducer,
+  socket:SocketSliceReducer,
   file: persistReducer(filePersistConfig, fileSliceReducer), // Persisted
 });
 

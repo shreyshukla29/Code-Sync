@@ -59,7 +59,6 @@ function Settings({
           value={theme}
            onChange={(e) =>{
             setTheme(e.target.value) 
-            console.log(typeof(theme))
            }}
         >
           {Object.entries(editorThemes).map(([themeName]) => (

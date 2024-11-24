@@ -9,6 +9,7 @@ import {
 } from "../repositories/user.repository.js";
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
+
 export const loginService = async (authDetails) => {
   // Logic for verifying user login, setting session/cookies, etc.
 
@@ -47,6 +48,7 @@ export const logoutService = async (user) => {
 
 export const signInUserService = async (userDetails) => {
   try {
+
     const userwithEmail = await findUser(userDetails.email);
     const userwithUsername = await findUser(userDetails.username);
 
@@ -55,7 +57,7 @@ export const signInUserService = async (userDetails) => {
     if (userwithUsername) throw "user with this username already exist";
 
     const response = await createUser(userDetails);
-    if (!repsosne) throw "internal server error";
+    if (!response) throw "internal server error";
     return response;
   } catch (error) {
     console.log(error);

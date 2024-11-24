@@ -14,7 +14,7 @@ export const createAccount = createAsyncThunk(
     console.log("data into thunk", data);
 
     try {
-      const response = axiosinstance.post("/api/users/singIn", data);
+      const response = axiosinstance.post("/api/users/signIn", data);
       toast.promise(response, {
         success: (resolvedPromise) => {
           return resolvedPromise.data.message;

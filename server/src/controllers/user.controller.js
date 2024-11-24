@@ -52,6 +52,7 @@ export const joinRoom = async (req, res) => {
 export const signInUser = async(req,res)=>{
 
   try {
+    console.log('hit')
 
     const response = await signInUserService(req.body);
     res.status(200).json({
@@ -60,6 +61,6 @@ export const signInUser = async(req,res)=>{
     })
     
   } catch (error) {
-    
+    console.log(error)
   }
 }

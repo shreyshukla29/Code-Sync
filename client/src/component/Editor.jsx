@@ -1,20 +1,19 @@
 /* eslint-disable react/prop-types */
 
 /* eslint-disable no-unused-vars */
-import React from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
-import { html } from '@codemirror/lang-html';
-import { 
-
-  vscodeDark, 
-  dracula, 
-  githubDark, 
+import React from "react";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { html } from "@codemirror/lang-html";
+import {
+  vscodeDark,
+  dracula,
+  githubDark,
   materialDark,
-  nord ,abcdef
+  nord,
+  abcdef,
 } from "@uiw/codemirror-themes-all";
-
 
 import { abyss } from "@uiw/codemirror-themes-all";
 import { androidstudio } from "@uiw/codemirror-themes-all";
@@ -54,64 +53,105 @@ import { whiteDark } from "@uiw/codemirror-themes-all";
 import { whiteLight } from "@uiw/codemirror-themes-all";
 import { xcodeDark } from "@uiw/codemirror-themes-all";
 import { xcodeLight } from "@uiw/codemirror-themes-all";
-import Sidebar from './sidebar/Sidebar';
-import FileTab from './editor/FileTab';
-import { useSelector } from 'react-redux';
-import {updateFileContent} from "../Redux/Slices/File.slice"
-import { useDispatch } from 'react-redux';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { editorThemes } from './../resources/Themes';
-import { toast } from 'react-hot-toast';
+import Sidebar from "./sidebar/Sidebar";
+import FileTab from "./editor/FileTab";
+import { useSelector } from "react-redux";
+import { updateFileContent } from "../Redux/Slices/File.slice";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { useEffect } from "react";
+import { editorThemes } from "./../resources/Themes";
+import { toast } from "react-hot-toast";
+import { useMemo } from "react";
 
-function Editor({theme, language,fontSize , fontFamily}) {
-
-  const {openFiles,activeFile} = useSelector((state)=>state.file)
-  console.log(theme)
+function Editor({ theme, language, fontSize, fontFamily }) {
+  const { openFiles, activeFile } = useSelector((state) => state.file);
 
   const [content, setcontent] = useState(activeFile?.content || "");
+  const { socket } = useSelector((state) => state.socket);
+  const { users, currentUser } = useSelector((state) => state.room);
 
-const dispatch = useDispatch();
-const handleSave = async () => {
-  const id = activeFile?.id;
-  if (id) {
-    const resp = await dispatch(updateFileContent({ id, content }));
-    toast.dismiss()
-    toast.success("Code saved")
-  }else {
-    toast.error("Error in saving code")
-  }
-};
+  const [timeoutId, setTimeoutId] = useState(null);
+  const filteredUsers = useMemo(
+    () => users.filter((user) => user.username !== currentUser.username),
+    [users, currentUser]
+  );
 
-// Listen for Ctrl+S or Cmd+S
-const handleKeyDown = (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-    e.preventDefault();
-    handleSave();
-  }
-
-  if (e.key === "Enter") {
-    e.preventDefault(); // Prevent default "Enter" behavior
-    setcontent((prevValue) => prevValue + "\n");
-  }
-};
-
-// Attach keydown listener on mount
-useEffect(() => {
-  window.addEventListener("keydown", handleKeyDown);
-  return () => {
-    window.removeEventListener("keydown", handleKeyDown);
+  const dispatch = useDispatch();
+  const handleSave = async () => {
+    const id = activeFile?.id;
+    if (id) {
+      const resp = await dispatch(updateFileContent({ id, content }));
+      toast.dismiss();
+      toast.success("Code saved");
+    } else {
+      toast.error("Error in saving code");
+    }
   };
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [content, activeFile,useSelector]);
-  
+
+  // Listen for Ctrl+S or Cmd+S
+  const handleKeyDown = (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+      e.preventDefault();
+      handleSave();
+      socket?.emit("file-updated", { fileId: activeFile.id, newContent: content });
+    }
+
+    if (e.key === "Enter") {
+      setcontent((prevValue) => prevValue + "\n");
+    }
+  };
+
+  const onCodeChange = (code, view) => {
+    if (!activeFile) return;
+
+    // Update the file content in Redux
+   // dispatch(updateFileContent({ id: activeFile.id, content: code }));
+
+    // Get the current cursor position
+    const cursorPosition = view.state.selection.main.head;
+    console.log("cursor", cursorPosition);
+    // Emit events via socket
+    socket?.emit("TYPING_START", { cursorPosition });
+    
+    // Handle "typing pause" debounce
+    if (timeoutId) clearTimeout(timeoutId);
+    const newTimeoutId = setTimeout(() => {
+      socket?.emit("TYPING_PAUSE");
+    }, 1000);
+    setTimeoutId(newTimeoutId);
+  };
+  // Attach keydown listener on mount
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content, activeFile, useSelector]);
+
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for updates to the file from other users
+    socket.on("file-updated", ({ fileId, newContent, userId }) => {
+            dispatch(updateFileContent({ id: fileId, content: newContent }));
+    });
+
+    // Clean up listener on component unmount
+    return () => {
+        socket.off("FILE_UPDATED");
+    };
+}, [socket, dispatch, currentUser]);
+
   const getLanguage = () => {
     switch (language) {
-      case 'javascript':
+      case "javascript":
         return javascript({ jsx: true });
-      case 'python':
+      case "python":
         return python();
-      case 'html':
+      case "html":
         return html();
       // case 'css':
       //   return css();
@@ -145,48 +185,46 @@ useEffect(() => {
   // Theme mapping
   const getTheme = () => {
     // Ensure the theme exists in the editorThemes object, fallback to 'VS Code Dark' if not found
-    console.log(editorThemes[theme])
-    console.log("theme ",editorThemes['VS Code Dark'])
-    return editorThemes[theme] || editorThemes['VS Code Dark'];
+    return editorThemes[theme] || editorThemes["VS Code Dark"];
   };
 
   return (
     <div className="flex flex-col h-screen w-full">
-        <FileTab />
-        
-        <div className="flex-grow overflow-scroll no-scrollbar h-full mb-1 border-t max-w-full">
-            {openFiles.length > 0 ? (
-                <CodeMirror
-                    value={activeFile?.content || ""}
-                    theme={getTheme()}
-                    height="calc(100vh - 32px)" // Adjust height for any header
-                    extensions={[
-                        getLanguage(), // Use the language function correctly
-                        getTheme(), // Apply the selected theme
-                    ]}
-                    minHeight="100%"
-                    maxWidth="100vw"
-                    onChange={(val) => setcontent(val)}
-                />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-              <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  className="h-16 w-16 mb-4 text-gray-400" 
-                  viewBox="0 0 20 20" 
-                  fill="currentColor"
-              >
-                  <path d="M8 2a2 2 0 012-2h4a2 2 0 012 2v6h-2V2H10v4H8V2zm5 6a2 2 0 00-2-2H2a2 2 0 00-2 2v6a2 2 0 002 2h9a2 2 0 002-2V8zm-1 6H2V8h9v6z" />
-              </svg>
-              <p className="text-lg font-semibold">No file open</p>
-              <p className="text-sm text-gray-400 mt-2">
-                  Select a file from the sidebar to start editing.
-              </p>
+      <FileTab />
+
+      <div className="flex-grow overflow-scroll no-scrollbar h-full mb-1 border-t max-w-full">
+        {openFiles.length > 0 ? (
+          <CodeMirror
+            value={activeFile?.content || ""}
+            theme={getTheme()}
+            height="calc(100vh - 32px)" // Adjust height for any header
+            extensions={[
+              getLanguage(), // Use the language function correctly
+              getTheme(), // Apply the selected theme
+            ]}
+            minHeight="100%"
+            maxWidth="100vw"
+            onChange={(val) => setcontent(val)}
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-16 w-16 mb-4 text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M8 2a2 2 0 012-2h4a2 2 0 012 2v6h-2V2H10v4H8V2zm5 6a2 2 0 00-2-2H2a2 2 0 00-2 2v6a2 2 0 002 2h9a2 2 0 002-2V8zm-1 6H2V8h9v6z" />
+            </svg>
+            <p className="text-lg font-semibold">No file open</p>
+            <p className="text-sm text-gray-400 mt-2">
+              Select a file from the sidebar to start editing.
+            </p>
           </div>
-            )}
-        </div>
+        )}
+      </div>
     </div>
-);
+  );
 }
 
 export default Editor;

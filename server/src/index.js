@@ -31,12 +31,12 @@ app.use("/api/users", userRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
   maxHttpBufferSize: 1e8,
   pingTimeout: 60000,
 });
-
-
-
 
 let userSocketMap = [];
 
@@ -69,7 +69,9 @@ function getUserBySocketId(socketId) {
 
 io.on("connection", (socket) => {
   // Handle user actions
+  console.log("connection");
   socket.on(SocketEvent.JOIN_REQUEST, ({ roomId, username }) => {
+    console.log("req for join");
     // Check if username exists in the room
     const isUsernameExist = getUsersInRoom(roomId).filter(
       (u) => u.username === username
@@ -92,10 +94,12 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     socket.broadcast.to(roomId).emit(SocketEvent.USER_JOINED, { user });
     const users = getUsersInRoom(roomId);
+    console.log(users)
     io.to(socket.id).emit(SocketEvent.JOIN_ACCEPTED, { user, users });
   });
 
   socket.on("disconnecting", () => {
+    console.log("disconnecting");
     const user = getUserBySocketId(socket.id);
     if (!user) return;
     const roomId = user.roomId;
@@ -108,6 +112,7 @@ io.on("connection", (socket) => {
   socket.on(
     SocketEvent.SYNC_FILE_STRUCTURE,
     ({ fileStructure, openFiles, activeFile, socketId }) => {
+      console.log("sync file");
       io.to(socketId).emit(SocketEvent.SYNC_FILE_STRUCTURE, {
         fileStructure,
         openFiles,
@@ -117,6 +122,7 @@ io.on("connection", (socket) => {
   );
 
   socket.on(SocketEvent.DIRECTORY_CREATED, ({ parentDirId, newDirectory }) => {
+    console.log("directory created");
     const roomId = getRoomId(socket.id);
     if (!roomId) return;
     socket.broadcast
@@ -125,6 +131,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on(SocketEvent.DIRECTORY_UPDATED, ({ dirId, children }) => {
+    console.log("directory updated");
     const roomId = getRoomId(socket.id);
     if (!roomId) return;
     socket.broadcast
@@ -156,6 +163,8 @@ io.on("connection", (socket) => {
 
   socket.on(SocketEvent.FILE_UPDATED, ({ fileId, newContent }) => {
     const roomId = getRoomId(socket.id);
+
+    console.log(newContent);
     if (!roomId) return;
     socket.broadcast
       .to(roomId)
@@ -257,12 +266,6 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.get("/", (req, res) => {
-  // Send the index.html file
-  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
-});
-
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

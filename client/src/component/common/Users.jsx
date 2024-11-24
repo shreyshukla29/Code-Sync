@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
-import { useAppContext } from "../../context/AppContext";
 import Avatar from "react-avatar";
+import { useSelector } from 'react-redux';
 
 function Users() {
-    const { users } = useAppContext();
+   const {users} = useSelector((state)=> state.room)
 
     return (
-        <div className="flex min-h-[200px] flex-grow justify-center overflow-y-auto py-2">
+        <div className="flex min-h-[200px] flex-grow justify-center overflow-y-auto py-2 mt-2">
             <div className="flex h-full w-full flex-wrap items-start gap-x-2 gap-y-6">
                 {users.map((user) => (
                     <User key={user.socketId} user={user} />

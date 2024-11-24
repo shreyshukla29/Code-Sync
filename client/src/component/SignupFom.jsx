@@ -1,15 +1,20 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { createAccount } from './../Redux/Slices/Auth.slice';
 
-const SignupForm = ({ onSwitch, onSubmit }) => {
+const SignupForm = ({ onSwitch }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-
-  const handleSignup = (e) => {
+const dispatch = useDispatch()
+  const handleSignup = async (e) => {
     e.preventDefault();
-    onSubmit({ name, email, password });
+    const resp = await dispatch(createAccount({name,username,email,password}));
+    if (resp.payload.success) {
+      onSwitch()
+  };
   };
 
   return (

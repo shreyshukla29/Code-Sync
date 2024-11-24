@@ -5,6 +5,7 @@ import  { useState, useEffect } from 'react';
 import FileExplorer from './sidebar-views/FilesView';
 import SettingsView from './sidebar-views/SettingsView';
 import RunView from './sidebar-views/RunView';
+import UsersView from './sidebar-views/UsersView';
 
 function Sidebar({theme,language,fontSize, fontFamily,setTheme,setLanguage,setFontFamily,setFontSize}) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
@@ -68,7 +69,7 @@ function Sidebar({theme,language,fontSize, fontFamily,setTheme,setLanguage,setFo
                 return <SettingsView theme={theme} language={language} 
                 fontSize={fontSize} fontFamily={fontFamily} setTheme={setTheme} setLanguage={setLanguage} setFontFamily={setFontFamily} setFontSize={setFontSize}/>;
             case "Users":
-                return <div className="text-white">Users</div>;
+                return <UsersView/>;
             default:
                 return <div className="text-white">Files Section</div>;
         }

@@ -12,8 +12,6 @@ import { toast } from "react-hot-toast"
 import { useLocation, useNavigate } from "react-router-dom"
 import FormComponent from './../component/forms/FormComponent';
 
-
-
 const Dashboard = () => {
   const [activeRooms, setActiveRooms] = useState([]);
   return (
