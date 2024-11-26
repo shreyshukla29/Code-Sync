@@ -58,6 +58,9 @@ function getRoomId(socketId) {
   return roomId;
 }
 
+
+
+
 function getUserBySocketId(socketId) {
   const user = userSocketMap.find((user) => user.socketId === socketId);
   if (!user) {
