@@ -73,8 +73,81 @@ Follow these steps to set up **Code Sync** on your local machine:
 - MongoDB  
 - Git  
 
-### Steps  
-1. **Clone the repository:**  
-   ```bash  
-   git clone https://github.com/your-username/code-sync.git  
-   cd code-sync  
+
+
+`## 📦 Installation
+
+Follow these steps to set up **Code Sync** on your local machine:
+
+### Prerequisites
+- Node.js
+- MongoDB
+- Git
+
+### Steps
+
+1. **Install dependencies:**
+  -   **For Server:**
+     
+    cd servee
+    npm install
+
+  -   **For Client:**
+    
+    cd client
+    npm install
+
+3.  **Set up the environment variables:**
+
+      Create a `.env` file as per env sample for both server and client
+   
+
+4.  **Start the application:**
+ -   **For Server:**
+
+    cd server
+    npm run dev
+
+ -   **For Client:**
+
+    cd client
+    npm run dev
+    
+5.  **Open in browser:**
+    Visit `http://localhost:5173` to access the application.
+
+* * * * *
+
+🖼️ Screenshots/Demo
+--------------------
+
+*(Add screenshots or demo links if available)*
+
+* * * * *
+
+🤝 Contributions
+----------------
+
+Contributions are welcome! If you'd like to contribute:
+
+1.  Fork the repository.
+2.  Create a new branch.
+3.  Make your changes and commit them.
+4.  Open a pull request.
+
+Feel free to open issues for bug reports or feature requests!
+
+* * * * *
+
+
+
+✉️ Contact
+----------
+
+If you have any questions, feel free to reach out:
+
+-   **Email:** [shreyshukla101217@gmail](mailto:shreyshukla101217@gmail.com)
+-   **GitHub:** [shreyshukla29](https://github.com/your-username)
+
+
+
