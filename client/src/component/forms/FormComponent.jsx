@@ -52,7 +52,19 @@ const FormComponent = () => {
       console.log(roomId)
     }
 
-    const joinRoom = (e) => {
+const joinRoom = (e)=>{
+  e.preventDefault()
+  console.log('hit join room');
+  if(!roomId){
+    toast.error('enter roomId')
+    return;
+   }
+
+   navigate(`/Editor/${roomId}`)
+   toast.success("room joined..")
+
+}
+    const createRoom = (e) => {
       console.log('hit')
         e.preventDefault()
       //  if (status === USER_STATUS.ATTEMPTING_JOIN) return
@@ -70,7 +82,7 @@ const FormComponent = () => {
         return;
        }
        navigate(`/Editor/${roomId}`)
-       toast.success("room joined..")
+       toast.success("room created successfully..")
     }
 
     // useEffect(() => {
@@ -136,7 +148,7 @@ const FormComponent = () => {
                 </button>
                 <button
                   className="bg-green-600 hover:bg-green-700 text-white p-2 rounded"
-                  onClick={joinRoom}
+                  onClick={createRoom}
 
                 >
                   Create Room
@@ -157,7 +169,7 @@ const FormComponent = () => {
                 <button
                   className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded"
                  
-                >
+               onClick={joinRoom} >
                   Join Room
                 </button>
               </div>

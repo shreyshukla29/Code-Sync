@@ -58,9 +58,6 @@ function getRoomId(socketId) {
   return roomId;
 }
 
-
-
-
 function getUserBySocketId(socketId) {
   const user = userSocketMap.find((user) => user.socketId === socketId);
   if (!user) {
@@ -97,7 +94,7 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     socket.broadcast.to(roomId).emit(SocketEvent.USER_JOINED, { user });
     const users = getUsersInRoom(roomId);
-    console.log(users)
+    console.log(users);
     io.to(socket.id).emit(SocketEvent.JOIN_ACCEPTED, { user, users });
   });
 
