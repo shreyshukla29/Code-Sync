@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid"; // to generate unique IDs for each file/folder
+import { toast } from 'react-hot-toast';
 
 // Utility to determine language by file extension
 const getLanguageByExtension = (filename) => {
-  
   const extension = filename.split(".").pop().toLowerCase();
   switch (extension) {
     case "js":
@@ -126,6 +126,11 @@ const fileSlice = createSlice({
   name: "fileSystem",
   initialState,
   reducers: {
+
+    setFileStructure : (state,action)=>{
+
+      state.FileStructure = action.payload
+    },
     addFileOrFolder: (state, action) => {
       const { parentId, name, type } = action.payload;
       const newItem = {
@@ -196,7 +201,7 @@ const fileSlice = createSlice({
     updateFileContent: (state, action) => {
       console.log("action", action.payload);
       const { id, content } = action.payload;
-      console.log(id , content)
+      console.log(id, content);
       state.fileStructure = findAndUpdateItemById(
         state.fileStructure,
         id,
@@ -225,8 +230,58 @@ const fileSlice = createSlice({
         state.activeFile.content = content;
       }
     },
+    setOpenFiles : (state,action)=>{
+      state.openFiles = action.payload
+    }
   },
 });
+
+export const setupFileSocketListeners = () => (dispatch, getState) => {
+  const socket = getState().socket.socket;
+
+  console.log("from file slice" , socket);
+  console.log("hello", socket);
+  if (!socket) {
+    console.log("return");
+    return;
+  }
+
+  const fileStructure = getState().file.fileStrucutre;
+  const openFiles = getState().file.openFiles;
+  const activeFile = getState().file.activeFile;
+
+  const handleUserJoined = ({ user }) => {
+    toast.success(`${user.username} joined`);
+
+    socket.emit("sync-file-structure", {
+      fileStructure,
+      openFiles,
+      activeFile,
+      socketId: user.socketId,
+    });
+  };
+
+  const handleFileStructureSync = 
+    ({
+        fileStructure,
+        openFiles,
+        activeFile,
+    }) => {
+        setFileStructure(fileStructure)
+        setOpenFiles(openFiles)
+        setActiveFile(activeFile)
+        toast.dismiss()
+    }
+  
+
+
+  socket.once("sync-file-structure", handleFileStructureSync)
+  socket.on("user-joined", handleUserJoined)
+  return () => {
+socket.off("user-joined")
+
+  };
+};
 
 export const {
   addFileOrFolder,
@@ -237,6 +292,7 @@ export const {
   setActiveFile,
   updateFileContent,
   saveFileContent,
+  setFileStructure,setOpenFiles
 } = fileSlice.actions;
 
 export default fileSlice.reducer;

@@ -1,13 +1,29 @@
 // src/redux/slices/roomSlice.js
 import { createSlice } from '@reduxjs/toolkit'
 
+
+ export const USER_STATUS = {
+    INITIAL : "initial",
+    CONNECTING : "connecting",
+    ATTEMPTING_JOIN : "attempting-join",
+    JOINED : "joined",
+    CONNECTION_FAILED : "connection-failed",
+    DISCONNECTED : "disconnected",
+}
+
+
+export const USER_CONNECTION_STATUS ={
+    OFFLINE : "offline",
+    ONLINE : "online",
+}
+
 const initialState = {
     users: [],
     currentUser: {
         username: "",
         roomId: "",
     },
-    status: "INITIAL", // USER_STATUS.INITIAL equivalent
+    status: USER_STATUS.INITIAL, // USER_STATUS.INITIAL equivalent
     activityState: "CODING", // ACTIVITY_STATE.CODING equivalent
     drawingData: null,
 }

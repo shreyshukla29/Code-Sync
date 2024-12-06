@@ -69,6 +69,7 @@ function Editor({ theme, language, fontSize, fontFamily }) {
 
   const [content, setcontent] = useState(activeFile?.content || "");
   const { socket } = useSelector((state) => state.socket);
+  console.log("scoket" , socket);
   const { users, currentUser } = useSelector((state) => state.room);
 
   const [timeoutId, setTimeoutId] = useState(null);

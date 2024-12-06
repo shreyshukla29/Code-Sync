@@ -13,11 +13,21 @@ const filePersistConfig = {
   storage,
 };
 
+const roomPersistConfig = {
+  key: "room",
+  storage,
+};
+
+// const socketPersistConfig = {
+//   key: "socket",
+//   storage,
+// };
+
 // Apply persistReducer only to the `file` slice
 const rootReducer = combineReducers({
   auth: AuthSliceReducer, // Non-persisted
-  room:RoomSliceReducer,
-  socket:SocketSliceReducer,
+  room: persistReducer(roomPersistConfig, RoomSliceReducer), // Persisted
+  socket: SocketSliceReducer, // Persisted
   file: persistReducer(filePersistConfig, fileSliceReducer), // Persisted
 });
 

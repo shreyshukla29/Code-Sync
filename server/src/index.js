@@ -59,7 +59,9 @@ function getRoomId(socketId) {
 }
 
 function getUserBySocketId(socketId) {
+  console.log(socketId)
   const user = userSocketMap.find((user) => user.socketId === socketId);
+  console.log("user",user)
   if (!user) {
     console.error("User not found for socket ID:", socketId);
     return null;
@@ -77,6 +79,7 @@ io.on("connection", (socket) => {
       (u) => u.username === username
     );
     if (isUsernameExist.length > 0) {
+      console.log('already exist')
       io.to(socket.id).emit(SocketEvent.USERNAME_EXISTS);
       return;
     }

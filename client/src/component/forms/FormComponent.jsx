@@ -3,75 +3,70 @@
 import { ChangeEvent, FormEvent, useEffect, useRef } from "react"
 import { toast } from "react-hot-toast"
 import { useLocation, useNavigate } from "react-router-dom"
-import {useSelector} from "react-redux"
+import {useSelector,useDispatch} from "react-redux"
 import { v4 as uuidv4 } from "uuid"
 import { useState } from 'react';
+import { useMemo } from 'react';
+import { io } from 'socket.io-client'
+import {initializeSocket,setupSocketListeners} from '../../Redux/Slices/Socket.Slice'
 
+import {setStatus,setCurrentUser} from "../../Redux/Slices/Room.slice"
+import { USER_STATUS,USER_CONNECTION_STATUS } from './../../Redux/Slices/Room.slice.js';
 
 const FormComponent = () => {
-
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
   const {username} = useSelector((state)=>state.auth.data)
-
-    // const location = useLocation()
-    // const { currentUser, setCurrentUser, status, setStatus } = useAppContext()
-    // const { socket } = useSocket();
-    // const usernameRef = useRef(null)
-     const navigate = useNavigate()
-
-    // const createNewRoomId = () => {
-    //     setCurrentUser({ ...currentUser, roomId: uuidv4() })
-    //     toast.success("Created a new Room Id")
-    //     usernameRef.current?.focus()
-    // }
-    const [roomName, setroomName] = useState("");
+  const {currentUser , status} = useSelector((state)=>state.room)
+  const socket = useMemo(
+    () =>
+        io(BACKEND_URL, {
+            reconnectionAttempts: 2,
+        }),
+    [],
+)
+   
+     const navigate = useNavigate();
+     const dispatch = useDispatch();
+  const [roomName, setroomName] = useState("");
    const [roomId, setroomId] = useState("");
-    // const validateForm = () => {
-    //     if (currentUser.username.length === 0) {
-    //         toast.error("Enter your username")
-    //         return false
-    //     } else if (currentUser.roomId.length === 0) {
-    //         toast.error("Enter a room id")
-    //         return false
-    //     } else if (currentUser.roomId.length < 5) {
-    //         toast.error("ROOM Id must be at least 5 characters long")
-    //         return false
-    //     } else if (currentUser.username.length < 3) {
-    //         toast.error("Username must be at least 3 characters long")
-    //         return false
-    //     }
-    //     return true
-    // }
-
+    const validateForm = () => {
+        if (roomId === 0) {
+            toast.error("Enter a room id")
+            return false
+        } else if (roomId.length < 5) {
+            toast.error("ROOM Id must be at least 5 characters long")
+            return false
+        } else if(roomName.length ==0){
+          toast.error("Enter room name")
+          return false;
+        }
+        return true
+    }
 
     const GenerateUniqueId =(e)=>{
       e.preventDefault();
       setroomId((val)=>
         uuidv4()
       )
-
-      console.log(roomId)
+      dispatch( setCurrentUser({ ...currentUser, 
+        username,roomId}))
     }
-
 const joinRoom = (e)=>{
   e.preventDefault()
-  console.log('hit join room');
+
+  if (status === USER_STATUS.ATTEMPTING_JOIN) return
   if(!roomId){
     toast.error('enter roomId')
     return;
    }
-
-   navigate(`/Editor/${roomId}`)
-   toast.success("room joined..")
+   toast.loading("Joining room...")
+   dispatch(setStatus(USER_STATUS.ATTEMPTING_JOIN))
 
 }
     const createRoom = (e) => {
-      console.log('hit')
         e.preventDefault()
-      //  if (status === USER_STATUS.ATTEMPTING_JOIN) return
-       // if (!validateForm()) return
-//setStatus(USER_STATUS.ATTEMPTING_JOIN)
-       // socket.emit(SocketEvent.JOIN_REQUEST, currentUser)
-
+        if (status === USER_STATUS.ATTEMPTING_JOIN) return
+        if (!validateForm()) return
        if(!roomId){
         toast.error('enter roomId')
         return;
@@ -81,44 +76,38 @@ const joinRoom = (e)=>{
         toast.error('enter room name')
         return;
        }
-       navigate(`/Editor/${roomId}`)
-       toast.success("room created successfully..")
+
+       toast.loading("creating room")
+       dispatch(setStatus(USER_STATUS.ATTEMPTING_JOIN))
+
     }
 
-    // useEffect(() => {
-    //     if (currentUser.roomId.length > 0) return
-    //     if (location.state?.roomId) {
-    //         setCurrentUser({ ...currentUser, roomId: location.state.roomId })
-    //         if (currentUser.username.length === 0) {
-    //             toast.success("Enter your username")
-    //         }
-    //     }
-    // }, [currentUser, location.state?.roomId, setCurrentUser])
+    useEffect(() => {
+      dispatch(initializeSocket(socket))
+  }, [dispatch,socket]);
 
-    // useEffect(() => {
-    //     if (status === USER_STATUS.DISCONNECTED && !socket.connected) {
-    //         socket.connect()
-    //         return
-    //     }
+  useEffect(() => {
+    if (status === USER_STATUS.DISCONNECTED && !socket.connected) {
+        socket.connect()
+        return
+    }
+    const isRedirect = sessionStorage.getItem("redirect") || false
 
-    //     const isRedirect = sessionStorage.getItem("redirect") || false
-
-    //     if (status === USER_STATUS.JOINED && !isRedirect) {
-    //         const username = currentUser.username
-    //         sessionStorage.setItem("redirect", "true")
-    //         navigate(`/editor/${currentUser.roomId}`, {
-    //             state: {
-    //                 username,
-    //             },
-    //         })
-    //     } else if (status === USER_STATUS.JOINED && isRedirect) {
-    //         sessionStorage.removeItem("redirect")
-    //         setStatus(USER_STATUS.DISCONNECTED)
-    //         socket.disconnect()
-    //         socket.connect()
-    //     }
-    // }, [currentUser, location.state?.redirect, navigate, setStatus, socket, status])
-
+    if (status === USER_STATUS.JOINED && !isRedirect) {
+        sessionStorage.setItem("redirect", "true")
+        navigate(`/editor/${currentUser.roomId}`, {
+            state: {
+                username,
+            },
+        })
+    } else if (status === USER_STATUS.JOINED && isRedirect) {
+      console.log("here")
+        sessionStorage.removeItem("redirect")
+        setStatus(USER_STATUS.DISCONNECTED)
+        socket.disconnect()
+        socket.connect()
+    }
+}, [currentUser, navigate, socket, status, username])
     return (
         <>
         <div className="border p-4 border-gray-700 lg:w-2/3">

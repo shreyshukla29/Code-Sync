@@ -22,9 +22,13 @@ export const loginUser = async (req, res) => {
 export const logoutUser = async (req, res) => {
   try {
     await logoutService(req.user);
-    res.status(200).json({ message: 'Logged out successfully' });
+    res.status(200).json({ message: 'Logged out successfully',
+      success:true
+     });
   } catch (error) {
-    res.status(500).json({ error: 'Logout failed', details: error.message });
+    res.status(500).json({ error: 'Logout failed', details: error.message,
+      success:false
+     });
   }
 };
 
