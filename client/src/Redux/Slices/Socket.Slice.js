@@ -4,14 +4,13 @@ import { createSlice } from "@reduxjs/toolkit";
 // import { io } from 'socket.io-client'
 import { toast } from "react-hot-toast";
 import {
-
   setUsers,
   setCurrentUser,
   setStatus,
   setDrawingData,
 } from "./Room.slice";
 // const {fileStrucuture , openFiles , activeFiles} = useSelector((state)=> state.file)
-import { USER_STATUS } from './Room.slice';
+import { USER_STATUS } from "./Room.slice";
 export const SocketEvent = {
   JOIN_REQUEST: "join-request",
   JOIN_ACCEPTED: "join-accepted",
@@ -69,14 +68,14 @@ export const setupSocketListeners = () => (dispatch, getState) => {
 
   const handleError = (err) => {
     console.error("Socket error:", err);
-    dispatch(setStatus("CONNECTION_FAILED"));
+    dispatch(setStatus(USER_STATUS.CONNECTION_FAILED));
     toast.dismiss();
     toast.error("Failed to connect to the server");
   };
 
   const handleUsernameExist = () => {
-    toast.dismiss();
-    dispatch(setStatus("INITIAL"));
+    toast.dismiss()
+    setStatus(USER_STATUS.INITIAL)
     toast.error(
       "The username you chose already exists in the room. Please choose a different username."
     );
@@ -84,9 +83,9 @@ export const setupSocketListeners = () => (dispatch, getState) => {
 
   const handleJoiningAccept = ({ user, users }) => {
     console.log("join accept");
+    toast.dismiss()
     dispatch(setCurrentUser(user));
     dispatch(setUsers(users));
-    toast.dismiss();
     dispatch(setStatus(USER_STATUS.JOINED));
   };
 
@@ -108,22 +107,21 @@ export const setupSocketListeners = () => (dispatch, getState) => {
     dispatch(setDrawingData(drawingData));
   };
 
-  socket.on("connect_error", handleError);
-  socket.on("connect_failed", handleError);
-  socket.on("USERNAME_EXISTS", handleUsernameExist);
-  socket.on("join-accepted", handleJoiningAccept);
-  socket.on("USER_DISCONNECTED", handleUserLeft);
-  socket.on("REQUEST_DRAWING", handleRequestDrawing);
-  socket.on("SYNC_DRAWING", handleDrawingSync);
-
+  socket.on("connect_error", handleError)
+        socket.on("connect_failed", handleError)
+        socket.on(SocketEvent.USERNAME_EXISTS, handleUsernameExist)
+        socket.on(SocketEvent.JOIN_ACCEPTED, handleJoiningAccept)
+        socket.on(SocketEvent.USER_DISCONNECTED, handleUserLeft)
+        socket.on(SocketEvent.REQUEST_DRAWING, handleRequestDrawing)
+        socket.on(SocketEvent.SYNC_DRAWING, handleDrawingSync)
   return () => {
-    socket.off("connect_error");
-    socket.off("connect_failed");
-    socket.off("join-accepted");
-    socket.off("USERNAME_EXISTS");
-    socket.off("USER_DISCONNECTED");
-    socket.off("REQUEST_DRAWING");
-    socket.off("SYNC_DRAWING");
+    socket.off("connect_error")
+            socket.off("connect_failed")
+            socket.off(SocketEvent.USERNAME_EXISTS)
+            socket.off(SocketEvent.JOIN_ACCEPTED)
+            socket.off(SocketEvent.USER_DISCONNECTED)
+            socket.off(SocketEvent.REQUEST_DRAWING)
+            socket.off(SocketEvent.SYNC_DRAWING)
   };
 };
 
