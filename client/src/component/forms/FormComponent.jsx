@@ -9,10 +9,9 @@ import { useState } from 'react';
 import { useMemo } from 'react';
 import { io } from 'socket.io-client'
 import {initializeSocket,setupSocketListeners} from '../../Redux/Slices/Socket.Slice'
-
+import { SocketEvent } from './../../Redux/Slices/Socket.Slice';
 import {setStatus,setCurrentUser} from "../../Redux/Slices/Room.slice"
 import { USER_STATUS,USER_CONNECTION_STATUS } from './../../Redux/Slices/Room.slice.js';
-
 const FormComponent = () => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
   const {username} = useSelector((state)=>state.auth.data)
@@ -24,7 +23,7 @@ const FormComponent = () => {
         }),
     [],
 )
-   
+   const [userStatus, setuserStatus] = useState(status);
      const navigate = useNavigate();
      const dispatch = useDispatch();
   const [roomName, setroomName] = useState("");
@@ -42,7 +41,6 @@ const FormComponent = () => {
         }
         return true
     }
-
     const GenerateUniqueId =(e)=>{
       e.preventDefault();
       setroomId((val)=>
@@ -61,6 +59,7 @@ const joinRoom = (e)=>{
    }
    toast.loading("Joining room...")
    dispatch(setStatus(USER_STATUS.ATTEMPTING_JOIN))
+   setuserStatus(USER_STATUS.ATTEMPTING_JOIN)
 
 }
     const createRoom = (e) => {
@@ -71,7 +70,6 @@ const joinRoom = (e)=>{
         toast.error('enter roomId')
         return;
        }
-
        if(!roomName){
         toast.error('enter room name')
         return;
@@ -79,35 +77,39 @@ const joinRoom = (e)=>{
 
        toast.loading("creating room")
        dispatch(setStatus(USER_STATUS.ATTEMPTING_JOIN))
-
+     //  navigate(`/Editor/${roomId}`)
+     setuserStatus(USER_STATUS.ATTEMPTING_JOIN)
+      console.log('hit create')
+      socket.emit(SocketEvent.JOIN_REQUEST, currentUser,(response) => {
+        if (response.success) {
+            setuserStatus('joined');
+        }})
     }
-
     useEffect(() => {
       dispatch(initializeSocket(socket))
   }, [dispatch,socket]);
+
 
   useEffect(() => {
     if (status === USER_STATUS.DISCONNECTED && !socket.connected) {
         socket.connect()
         return
     }
+    console.log("status update",status)
+    dispatch(setupSocketListeners())
     const isRedirect = sessionStorage.getItem("redirect") || false
-
+    console.log(isRedirect)
     if (status === USER_STATUS.JOINED && !isRedirect) {
         sessionStorage.setItem("redirect", "true")
-        navigate(`/editor/${currentUser.roomId}`, {
-            state: {
-                username,
-            },
-        })
+        navigate(`/Editor/${roomId}`)
     } else if (status === USER_STATUS.JOINED && isRedirect) {
-      console.log("here")
+      console.log("inside  condition")
         sessionStorage.removeItem("redirect")
         setStatus(USER_STATUS.DISCONNECTED)
         socket.disconnect()
         socket.connect()
     }
-}, [currentUser, navigate, socket, status, username])
+}, [currentUser, dispatch, navigate, socket, status, username,setStatus,setuserStatus])
     return (
         <>
         <div className="border p-4 border-gray-700 lg:w-2/3">

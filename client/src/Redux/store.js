@@ -26,7 +26,7 @@ const roomPersistConfig = {
 // Apply persistReducer only to the `file` slice
 const rootReducer = combineReducers({
   auth: AuthSliceReducer, // Non-persisted
-  room: persistReducer(roomPersistConfig, RoomSliceReducer), // Persisted
+  room: RoomSliceReducer, // Persisted
   socket: SocketSliceReducer, // Persisted
   file: persistReducer(filePersistConfig, fileSliceReducer), // Persisted
 });
