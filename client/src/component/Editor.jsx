@@ -63,22 +63,24 @@ import { useEffect } from "react";
 import { editorThemes } from "./../resources/Themes";
 import { toast } from "react-hot-toast";
 import { useMemo } from "react";
+import { SocketEvent } from './../Redux/Slices/Socket.Slice';
 
 function Editor({ theme, language, fontSize, fontFamily }) {
   const { openFiles, activeFile } = useSelector((state) => state.file);
-
   const [content, setcontent] = useState(activeFile?.content || "");
   const { socket } = useSelector((state) => state.socket);
-  console.log("scoket" , socket);
   const { users, currentUser } = useSelector((state) => state.room);
 
-  const [timeoutId, setTimeoutId] = useState(null);
+
+  const [timeOut, setTimeOut] = useState(setTimeout(() => {}, 0))
   const filteredUsers = useMemo(
     () => users.filter((user) => user.username !== currentUser.username),
     [users, currentUser]
   );
 
   const dispatch = useDispatch();
+
+
   const handleSave = async () => {
     const id = activeFile?.id;
     if (id) {
@@ -106,21 +108,21 @@ function Editor({ theme, language, fontSize, fontFamily }) {
   const onCodeChange = (code, view) => {
     if (!activeFile) return;
 
-    // Update the file content in Redux
-   // dispatch(updateFileContent({ id: activeFile.id, content: code }));
-
-    // Get the current cursor position
     const cursorPosition = view.state.selection.main.head;
     console.log("cursor", cursorPosition);
-    // Emit events via socket
-    socket?.emit("TYPING_START", { cursorPosition });
+
+    socket.emit(SocketEvent.TYPING_START, { cursorPosition })
+    socket.emit(SocketEvent.FILE_UPDATED, {
+        fileId: activeFile.id,
+        newContent: code,
+    })
+    clearTimeout(timeOut)
     
-    // Handle "typing pause" debounce
-    if (timeoutId) clearTimeout(timeoutId);
-    const newTimeoutId = setTimeout(() => {
-      socket?.emit("TYPING_PAUSE");
-    }, 1000);
-    setTimeoutId(newTimeoutId);
+    const newTimeOut = setTimeout(
+      () => socket.emit(SocketEvent.TYPING_PAUSE),
+      1000,
+  )
+  setTimeOut(newTimeOut)
   };
   // Attach keydown listener on mount
   useEffect(() => {
@@ -132,19 +134,7 @@ function Editor({ theme, language, fontSize, fontFamily }) {
   }, [content, activeFile, useSelector]);
 
 
-  useEffect(() => {
-    if (!socket) return;
-
-    // Listen for updates to the file from other users
-    socket.on("file-updated", ({ fileId, newContent, userId }) => {
-            dispatch(updateFileContent({ id: fileId, content: newContent }));
-    });
-
-    // Clean up listener on component unmount
-    return () => {
-        socket.off("FILE_UPDATED");
-    };
-}, [socket, dispatch, currentUser]);
+ 
 
   const getLanguage = () => {
     switch (language) {
