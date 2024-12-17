@@ -14,12 +14,12 @@ function EditorPage() {
     const [language, setLanguage] = useState('javascript');
     const currentUser = useSelector((state) => state.room.currentUser)
     const status = useSelector((state) => state.room.status)
-    const {socket}= useSelector((state)=>state.socket)
+   
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
-    const sock = useMemo(
+    const socket = useMemo(
         () =>
             io(BACKEND_URL, {
-                reconnectionAttempts: 2,
+                reconnectionAttempts: 1,
             }),
         [],
     )
@@ -30,13 +30,9 @@ function EditorPage() {
     const username = useSelector((state)=> state.auth?.data?.username)
    // const [Socket, setSocket] = useState(socket);
    useEffect(() => {
-
-    if(socket == null){
-
-        dispatch(initializeSocket(sock))
-    }
+        dispatch(initializeSocket(socket))
   
-}, [dispatch, sock, socket]);
+}, []);
     useEffect(() => {
        
         
@@ -51,7 +47,7 @@ function EditorPage() {
             socket?.emit(SocketEvent.JOIN_REQUEST, user) // Emit socket event
         }
      
-    }, [dispatch, username, status, roomId, socket, currentUser.username.length, navigate])
+    }, [])
     return (
         <div className="flex h-screen"> 
            <Sidebar theme={theme} language={language} 

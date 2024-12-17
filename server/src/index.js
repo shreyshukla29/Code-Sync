@@ -42,6 +42,7 @@ let userSocketMap = [];
 
 // Function to get all users in a room
 function getUsersInRoom(roomId) {
+  console.log("user map", userSocketMap);
   return userSocketMap.filter((user) => user.roomId === roomId);
 }
 
@@ -57,33 +58,31 @@ function getRoomId(socketId) {
   }
   return roomId;
 }
-
 function getUserBySocketId(socketId) {
-  console.log(socketId)
+  console.log(socketId);
   const user = userSocketMap.find((user) => user.socketId === socketId);
-  console.log("user",user)
+  console.log("user", user);
   if (!user) {
     console.error("User not found for socket ID:", socketId);
     return null;
   }
   return user;
 }
-
 io.on("connection", (socket) => {
   // Handle user actions
   console.log("connection");
   socket.on(SocketEvent.JOIN_REQUEST, ({ roomId, username }) => {
     console.log("req for join");
+    console.log(roomId);
     // Check if username exists in the room
     const isUsernameExist = getUsersInRoom(roomId).filter(
       (u) => u.username === username
     );
     if (isUsernameExist.length > 0) {
-      console.log('already exist')
+      console.log("already exist");
       io.to(socket.id).emit(SocketEvent.USERNAME_EXISTS);
       return;
     }
-
     const user = {
       username,
       roomId,
@@ -97,12 +96,13 @@ io.on("connection", (socket) => {
     socket.join(roomId);
     socket.broadcast.to(roomId).emit(SocketEvent.USER_JOINED, { user });
     const users = getUsersInRoom(roomId);
-    console.log(users);
+    console.log("users in room", users);
     io.to(socket.id).emit(SocketEvent.JOIN_ACCEPTED, { user, users });
   });
 
   socket.on("disconnecting", () => {
     console.log("disconnecting");
+    console.log("before dissconnect", userSocketMap);
     const user = getUserBySocketId(socket.id);
     if (!user) return;
     const roomId = user.roomId;
@@ -166,8 +166,9 @@ io.on("connection", (socket) => {
 
   socket.on(SocketEvent.FILE_UPDATED, ({ fileId, newContent }) => {
     const roomId = getRoomId(socket.id);
-
-    console.log(newContent);
+console.log('file id',fileId)
+    console.log("code ", newContent);
+    console.log(roomId);
     if (!roomId) return;
     socket.broadcast
       .to(roomId)
@@ -222,12 +223,14 @@ io.on("connection", (socket) => {
 
   // Handle cursor position
   socket.on(SocketEvent.TYPING_START, ({ cursorPosition }) => {
+    console.log("typing start",socket.id)
     userSocketMap = userSocketMap.map((user) => {
       if (user.socketId === socket.id) {
         return { ...user, typing: true, cursorPosition };
       }
       return user;
     });
+
     const user = getUserBySocketId(socket.id);
     if (!user) return;
     const roomId = user.roomId;

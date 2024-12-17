@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { nanoid } from "nanoid"; // to generate unique IDs for each file/folder
 import { toast } from 'react-hot-toast';
 import { SocketEvent } from './Socket.Slice';
+import { useCallback } from 'react';
 // Utility to determine language by file extension
 const getLanguageByExtension = (filename) => {
   const extension = filename.split(".").pop().toLowerCase();
@@ -272,14 +273,26 @@ export const setupFileSocketListeners = () => (dispatch, getState) => {
         setActiveFile(activeFile)
         toast.dismiss()
     }
+
+    const handleFileUpdated = useCallback(
+      ({ fileId, content} ) => {
+        updateFileContent({fileId, content})
+          // Update the content of the active file if it's the same file
+          if (activeFile?.id === fileId) {
+              setActiveFile({ ...activeFile, content: content })
+          }
+      },
+      [activeFile],
+  )
   
 
 
   socket.once( SocketEvent.SYNC_FILE_STRUCTURE, handleFileStructureSync)
   socket.on(SocketEvent.USER_JOINED, handleUserJoined)
+  socket.on(SocketEvent.FILE_UPDATED, handleFileUpdated)
   return () => {
 socket.off(SocketEvent.USER_JOINED)
-
+socket.off(SocketEvent.FILE_UPDATED)
   };
 };
 

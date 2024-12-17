@@ -107,10 +107,8 @@ function Editor({ theme, language, fontSize, fontFamily }) {
 
   const onCodeChange = (code, view) => {
     if (!activeFile) return;
-
-    const cursorPosition = view.state.selection.main.head;
+    const cursorPosition = view?.state?.selection.main?.head;
     console.log("cursor", cursorPosition);
-
     socket.emit(SocketEvent.TYPING_START, { cursorPosition })
     socket.emit(SocketEvent.FILE_UPDATED, {
         fileId: activeFile.id,
@@ -195,7 +193,7 @@ function Editor({ theme, language, fontSize, fontFamily }) {
             ]}
             minHeight="100%"
             maxWidth="100vw"
-            onChange={(val) => setcontent(val)}
+            onChange={onCodeChange}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">

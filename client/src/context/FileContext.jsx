@@ -712,6 +712,7 @@ function FileContextProvider({ children }) {
 
     const handleFileUpdated = useCallback(
         ({ fileId, newContent }) => {
+            console.log('in file update')
             updateFileContent(fileId, newContent)
             // Update the content of the active file if it's the same file
             if (activeFile?.id === fileId) {

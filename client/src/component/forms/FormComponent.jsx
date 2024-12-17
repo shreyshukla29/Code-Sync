@@ -46,8 +46,7 @@ const FormComponent = () => {
       setroomId((val)=>
         uuidv4()
       )
-      dispatch( setCurrentUser({ ...currentUser, 
-        username,roomId}))
+      
     }
 const joinRoom = (e)=>{
   e.preventDefault()
@@ -60,7 +59,10 @@ const joinRoom = (e)=>{
    toast.loading("Joining room...")
    dispatch(setStatus(USER_STATUS.ATTEMPTING_JOIN))
    setuserStatus(USER_STATUS.ATTEMPTING_JOIN)
-
+   socket.emit(SocketEvent.JOIN_REQUEST, currentUser,(response) => {
+  if (response.success) {
+        setuserStatus('joined');
+    }})
 }
     const createRoom = (e) => {
         e.preventDefault()
@@ -79,7 +81,6 @@ const joinRoom = (e)=>{
        dispatch(setStatus(USER_STATUS.ATTEMPTING_JOIN))
      //  navigate(`/Editor/${roomId}`)
      setuserStatus(USER_STATUS.ATTEMPTING_JOIN)
-      console.log('hit create')
       socket.emit(SocketEvent.JOIN_REQUEST, currentUser,(response) => {
         if (response.success) {
             setuserStatus('joined');
@@ -87,7 +88,8 @@ const joinRoom = (e)=>{
     }
     useEffect(() => {
       dispatch(initializeSocket(socket))
-  }, [dispatch,socket]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket]);
 
 
   useEffect(() => {
@@ -95,7 +97,6 @@ const joinRoom = (e)=>{
         socket.connect()
         return
     }
-    console.log("status update",status)
     dispatch(setupSocketListeners())
     const isRedirect = sessionStorage.getItem("redirect") || false
     console.log(isRedirect)
