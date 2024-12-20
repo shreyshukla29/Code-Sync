@@ -86,12 +86,6 @@ const joinRoom = (e)=>{
             setuserStatus('joined');
         }})
     }
-    useEffect(() => {
-      dispatch(initializeSocket(socket))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket]);
-
-
   useEffect(() => {
     if (status === USER_STATUS.DISCONNECTED && !socket.connected) {
         socket.connect()
@@ -104,11 +98,9 @@ const joinRoom = (e)=>{
         sessionStorage.setItem("redirect", "true")
         navigate(`/Editor/${roomId}`)
     } else if (status === USER_STATUS.JOINED && isRedirect) {
-      console.log("inside  condition")
         sessionStorage.removeItem("redirect")
         dispatch(setStatus(USER_STATUS.DISCONNECTED))
         setuserStatus(USER_STATUS.DISCONNECTED);
-        console.log('discconect happen')
         socket.disconnect()
         socket.connect()
     }
