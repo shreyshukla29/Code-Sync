@@ -4,10 +4,13 @@
   "description": "",
   "type": "module",
   "main": "index.mjs",
-  "scripts": {
-    "test": "npm start",
-    "start": "nodemon src/index.js"
-  },
+
+    "scripts": {
+      "start": "node src/index.js",   
+      "dev": "nodemon src/index.js", 
+      "test": "npm run dev"                               
+    },
+  
   "author": "shrey",
   "license": "ISC",
   "dependencies": {

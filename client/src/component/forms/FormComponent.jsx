@@ -106,7 +106,9 @@ const joinRoom = (e)=>{
     } else if (status === USER_STATUS.JOINED && isRedirect) {
       console.log("inside  condition")
         sessionStorage.removeItem("redirect")
-        setStatus(USER_STATUS.DISCONNECTED)
+        dispatch(setStatus(USER_STATUS.DISCONNECTED))
+        setuserStatus(USER_STATUS.DISCONNECTED);
+        console.log('discconect happen')
         socket.disconnect()
         socket.connect()
     }
